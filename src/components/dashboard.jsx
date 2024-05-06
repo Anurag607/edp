@@ -4,11 +4,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { DropdownMenuTrigger, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { CardHeader, CardContent, Card } from "@/components/ui/card"
-import Image from "next/image"
 import { DropdownMenuIcon } from "@radix-ui/react-icons"
 import { useState, useEffect } from "react"
 import moment from "moment";
-import axios from "axios";
 
 function formatRelativeTime(isoDateString) {
   const now = moment();
@@ -38,53 +36,25 @@ function formatRelativeTime(isoDateString) {
   return result.trim();
 }
 
-const placeholderLogs = [
-  {
-    id: 1,
-    name: "Front Entrance",
-    date: "/placeholder.svg",
-    time: "2 min ago",
-    message: "Motion detected at the front entrance."
-  },
-  {
-    id: 2,
-    name: "Backyard",
-    date: "/placeholder.svg",
-    time: "10 min ago",
-    message: "Motion detected in the backyard."
-  },
-  {
-    id: 3,
-    name: "Garage",
-    date: "/placeholder.svg",
-    time: "30 min ago",
-    message: "Motion detected in the garage."
-  },
-  {
-    id: 4,
-    name: "Side Entrance",
-    date: "/placeholder.svg",
-    time: "1 hour ago",
-    message: "Motion detected at the side entrance."
-  },
-  {
-    id: 5,
-    name: "Front Entrance",
-    time: "2 min ago",
-    message: "Motion detected at the front entrance."
-  }
-];
-
 const fetcher = async () => {
-  const res = await axios.get("/api/read/", {
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache', 
-    },
-  });
-
-  const body = await res.data;
-  return body.data;
+  try {
+    const res = await fetch("/api/read/", {
+      method: "GET",
+      cache: 'no-store',
+      headers: {
+        "Content-type": "application/json",
+        "Cache-Control": "no-store",
+      },
+      next: {
+        revalidate: 2500,
+      },
+    });
+  
+    const body = await res.json();
+    return body.data;
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 
@@ -115,10 +85,10 @@ export function Dashboard() {
       setIsloading(false);
     }
     getLogs();
-    setImgUrl(
-      (localStorage.getItem("imgUrl") && typeof localStorage.getItem("imgUrl") !== "string")  ? 
-      JSON.parse(localStorage.getItem("imgUrl")).image : "/placeholder.svg"
-    );
+    // setImgUrl(
+    //   (localStorage.getItem("imgUrl") && typeof localStorage.getItem("imgUrl") !== "string")  ? 
+    //   JSON.parse(localStorage.getItem("imgUrl")).image : "/placeholder.svg"
+    // );
     
     const intervalId = setInterval(getLogs, 2500);
     
