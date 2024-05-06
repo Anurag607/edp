@@ -36,6 +36,32 @@ function formatRelativeTime(isoDateString) {
   return result.trim();
 }
 
+function formatTimestamp(timestamp) {
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    
+    const date = new Date(timestamp);
+
+    // Get the day name, date, month, and year
+    const dayName = days[date.getUTCDay()];
+    const day = date.getUTCDate();
+    const month = months[date.getUTCMonth()];
+    const year = date.getUTCFullYear();
+
+    // Format the day with the appropriate suffix
+    const suffix = day % 10 === 1 && day !== 11 ? "st" :
+                   day % 10 === 2 && day !== 12 ? "nd" :
+                   day % 10 === 3 && day !== 13 ? "rd" : "th";
+
+    // Get hours, minutes, and seconds in 24-hour format
+    const hours = date.getUTCHours().toString().padStart(2, '0');
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+
+    // Return the formatted string
+    return `${dayName}: ${day}${suffix} ${month} ${year} at ${hours}:${minutes}:${seconds}`;
+}
+
 const fetcher = async () => {
   try {
     const res = await fetch("/api/read/", {
@@ -57,6 +83,18 @@ const fetcher = async () => {
   }
 }
 
+function parseFormattedTimestamp(formattedTimestamp) {
+    const dateTimePart = formattedTimestamp.split(': ')[1].replace(' at ', ' ');
+    const dateTime = dateTimePart.replace(/(\d+)(st|nd|rd|th)/, '$1');
+
+    // Convert this date string back to a date object
+    return new Date(dateTime);
+}
+
+function sortFormattedTimestamps(timestamps) {
+    return timestamps.sort((a, b) => parseFormattedTimestamp(b.date) - parseFormattedTimestamp(a.date));
+}
+
 
 export function Dashboard() {
   const [imgUrl, setImgUrl] = useState("/placeholder.svg");
@@ -71,9 +109,8 @@ export function Dashboard() {
         setLogs([]);
         return;
       }
-      data = data.sort((a, b) => new Date(b.date) - new Date(a.date));
       data = data.map((el, _) => {
-        let converted_date = formatRelativeTime(el.date);
+        let converted_date = formatTimestamp(el.date);
         if(converted_date[0] === '-') converted_date = converted_date.slice(1) + " ago";
 
         return {
@@ -81,6 +118,7 @@ export function Dashboard() {
           date: converted_date
         }
       });
+      data = sortFormattedTimestamps(data);
       setLogs(data);
       setIsloading(false);
     }
