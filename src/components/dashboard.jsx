@@ -79,6 +79,7 @@ const fetcher = async () => {
   const res = await axios.get("/api/read/", {
     headers: {
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache', 
     },
   });
 
