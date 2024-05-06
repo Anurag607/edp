@@ -85,10 +85,10 @@ export function Dashboard() {
       setIsloading(false);
     }
     getLogs();
-    // setImgUrl(
-    //   (localStorage.getItem("imgUrl") && typeof localStorage.getItem("imgUrl") !== "string")  ? 
-    //   JSON.parse(localStorage.getItem("imgUrl")).image : "/placeholder.svg"
-    // );
+    setImgUrl(
+      (localStorage.getItem("imgUrl") && typeof localStorage.getItem("imgUrl") !== "string")  ? 
+      JSON.parse(localStorage.getItem("imgUrl")).image : "/placeholder.svg"
+    );
     
     const intervalId = setInterval(getLogs, 2500);
     
@@ -168,21 +168,32 @@ export function Dashboard() {
             )}
             {logs.map((log, index) => {
               return (
-                <Card key={index} className={"mb-4 !cursor-pointer"} onClick={(e) => {
-                  e.preventDefault();
-                  setImgUrl(log);
-                  localStorage.setItem("imgUrl", log.image);
-                }}>
-                  <CardHeader className="flex items-center justify-between">
+                <Card 
+                  key={index} 
+                  className={"mb-4 !cursor-pointer relative"} 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setImgUrl(log);
+                    localStorage.setItem("imgUrl", log.image);
+                  }}
+                  style={{
+                    backgroundImage: `url(${log.image})`,
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                >
+                  {/* <div className="absolute top-0 left-0 w-full h-full opacity-50 bg-neutral-800 z-[0]" /> */}
+                  <CardHeader className="flex items-center justify-between backdrop-brightness-50">
                     <div className="flex items-center gap-2">
-                      <CameraIcon className="h-5 w-5 text-gray-500" />
+                      <CameraIcon className="h-5 w-5 text-gray-200 font-bold" />
                       <span className="text-sm font-medium">{`Log 0${index+1}.`}</span> 
                     </div>
-                    <span className="text-xs text-gray-500">{log.date}</span>
+                    <span className="text-xs text-gray-200 font-bold">{log.date}</span>
+                    <p className="text-sm text-gray-200 font-bold !text-left w-full">{log.message}</p>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-gray-500">{log.message}</p>
-                  </CardContent>
+                  {/* <CardContent className={" backdrop-blur-sm"}>
+                  </CardContent> */}
                 </Card>
               )
             })}
